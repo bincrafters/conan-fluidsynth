@@ -145,6 +145,8 @@ class FluidSynthConan(ConanFile):
     def build(self):
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                   os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
+                              "-fsanitize=undefined", "")
         shutil.copy("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
