@@ -147,6 +147,8 @@ class FluidSynthConan(ConanFile):
                   os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"))
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
                               "-fsanitize=undefined", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
+                              'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
         shutil.copy("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
