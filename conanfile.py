@@ -158,7 +158,7 @@ class FluidSynthConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["fluidsynth"]
+        self.cpp_info.libs = ["libfluidsynth" if self.settings.compiler == "Visual Studio" else "fluidsynth"]
         if self.settings.os == "Macos":
             frameworks = []
             if self.options.coreaudio:
