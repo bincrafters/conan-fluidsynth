@@ -143,12 +143,12 @@ class FluidSynthConan(ConanFile):
         return cmake
 
     def build(self):
-        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                  os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-                              "-fsanitize=undefined", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-                              'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
+        cmakelists = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
+        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), cmakelists)
+        # remove some quirks, let conan manage them
+        tools.replace_in_file(cmakelists, '-fsanitize=undefined', '')
+        tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
+        tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
         shutil.copy("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
