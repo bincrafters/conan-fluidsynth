@@ -78,7 +78,7 @@ class FluidSynthConan(ConanFile):
                      CustomOption("midishare"),
                      CustomOption("opensles"),
                      CustomOption("oboe"),
-                     CustomOption("network"),
+                     CustomOption("network", default=True),
                      CustomOption("oss"),
                      CustomOption("dsound", default=True, platforms=["Windows"]),
                      CustomOption("waveout", default=True, platforms=["Windows"]),
@@ -131,6 +131,7 @@ class FluidSynthConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["enable-debug"] = self.settings.build_type == "Debug"
+        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["enable-tests"] = False
         cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
         for o in self.conan_options:
@@ -176,6 +177,8 @@ class FluidSynthConan(ConanFile):
                 self.cpp_info.exelinkflags.append("-framework %s" % framework)
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
         if self.settings.os == "Windows":
+            if self.options.network:
+                self.cpp_info.libs.append("ws2_32")
             if self.options.dsound:
                 self.cpp_info.libs.append("dsound")
             if self.options.winmidi:
