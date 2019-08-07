@@ -123,15 +123,15 @@ class FluidSynthConan(ConanFile):
 
     def source(self):
         source_url = "https://github.com/FluidSynth/fluidsynth"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version),
-                  sha256="69b244512883491e7e66b4d0151c61a0d6d867d4d2828c732563be0f78abcc51")
+        sha256 = "69b244512883491e7e66b4d0151c61a0d6d867d4d2828c732563be0f78abcc51"
+        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version), sha256=sha256)
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["enable-debug"] = self.settings.build_type == "Debug"
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared  # fluidsynth forces to True by default
         cmake.definitions["enable-tests"] = False
         cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
         for o in self.conan_options:
@@ -143,17 +143,20 @@ class FluidSynthConan(ConanFile):
                         source_folder=self._source_subfolder)
         return cmake
 
-    def build(self):
+    def _patch_files(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), cmakelists)
         # remove some quirks, let conan manage them
         tools.replace_in_file(cmakelists, '-fsanitize=undefined', '')
         tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
         tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
-        shutil.copy("CMakeLists.txt",
-                    os.path.join(self._source_subfolder, "CMakeLists.txt"))
-
+        tools.replace_in_file(cmakelists, 'GLIB_INCLUDE_DIRS ${GLIBH_DIR} ${GLIBCONF_DIR}', 'GLIB_INCLUDE_DIRS ${CONAN_INCLUDE_DIRS_GLIB}')
+        tools.replace_in_file(cmakelists, 'GLIB_LIBRARIES ${GLIB_LIB} ${GTHREAD_LIB}', 'GLIB_LIBRARIES ${CONAN_LIBS_GLIB}')
+        shutil.copy("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
         shutil.move("pcre.pc", "libpcre.pc")
+
+    def build(self):
+        self._patch_files()
         cmake = self._configure_cmake()
         cmake.build()
 
