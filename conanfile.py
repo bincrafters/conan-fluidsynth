@@ -84,7 +84,7 @@ class FluidSynthConan(ConanFile):
                      CustomOption("waveout", default=True, platforms=["Windows"]),
                      CustomOption("winmidi", default=True, platforms=["Windows"]),
                      CustomOption("sdl2", requirements=["sdl2/2.0.9@bincrafters/stable"]),
-                     CustomOption("pkgconfig"),
+                     CustomOption("pkgconfig", default=True),
                      CustomOption("pulseaudio"),
                      CustomOption("readline", requirements=["readline/7.0@bincrafters/stable"]),
                      CustomOption("threads"),
@@ -150,20 +150,22 @@ class FluidSynthConan(ConanFile):
         tools.replace_in_file(cmakelists, '-fsanitize=undefined', '')
         tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
         tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
-        tools.replace_in_file(cmakelists, 'GLIB_INCLUDE_DIRS ${GLIBH_DIR} ${GLIBCONF_DIR}', 'GLIB_INCLUDE_DIRS ${CONAN_INCLUDE_DIRS_GLIB}')
-        tools.replace_in_file(cmakelists, 'GLIB_LIBRARIES ${GLIB_LIB} ${GTHREAD_LIB}', 'GLIB_LIBRARIES ${CONAN_LIBS_GLIB}')
         shutil.copy("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
-        shutil.move("pcre.pc", "libpcre.pc")
+        # FIXME : components
+        shutil.copy("glib.pc", "glib-2.0.pc")
+        shutil.copy("glib.pc", "gthread-2.0.pc")
 
     def build(self):
         self._patch_files()
-        cmake = self._configure_cmake()
-        cmake.build()
+        with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
+            cmake = self._configure_cmake()
+            cmake.install()
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
