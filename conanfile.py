@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 import shutil
@@ -103,6 +101,7 @@ class FluidSynthConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if self.options.pkgconfig:
