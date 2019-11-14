@@ -55,7 +55,6 @@ class FluidSynthConan(ConanFile):
     topics = ("conan", "fluidsynth", "soundfont", "midi", "synthesizer")
     url = "https://github.com/bincrafters/conan-fluidsynth"
     homepage = "http://www.fluidsynth.org/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "LGPL-2.1-only"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
@@ -87,7 +86,7 @@ class FluidSynthConan(ConanFile):
                      CustomOption("readline", requirements=["readline/7.0@bincrafters/stable"]),
                      CustomOption("threads"),
                      CustomOption("lash", platforms=["Linux", "FreeBSD"]),
-                     CustomOption("alsa", platforms=["Linux", "FreeBSD"], requirements=["libalsa/1.1.5@conan/stable"]),
+                     CustomOption("alsa", platforms=["Linux", "FreeBSD"], requirements=["libalsa/1.1.9"]),
                      CustomOption("systemd", platforms=["Linux"]),
                      CustomOption("coreaudio", default=True, platforms=["Macos"]),
                      CustomOption("coremidi", default=True, platforms=["Macos"]),
