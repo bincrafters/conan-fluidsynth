@@ -142,8 +142,7 @@ class FluidSynthConan(ConanFile):
         return cmake
 
     def _patch_files(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), cmakelists)
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # remove some quirks, let conan manage them
         tools.replace_in_file(cmakelists, '-fsanitize=undefined', '')
         tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
