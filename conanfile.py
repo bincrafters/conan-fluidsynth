@@ -56,7 +56,6 @@ class FluidSynthConan(ConanFile):
     url = "https://github.com/bincrafters/conan-fluidsynth"
     homepage = "http://www.fluidsynth.org/"
     license = "LGPL-2.1-only"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
@@ -120,9 +119,7 @@ class FluidSynthConan(ConanFile):
                         self.requires(r)
 
     def source(self):
-        source_url = "https://github.com/FluidSynth/fluidsynth"
-        sha256 = "69b244512883491e7e66b4d0151c61a0d6d867d4d2828c732563be0f78abcc51"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version), sha256=sha256)
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -147,7 +144,6 @@ class FluidSynthConan(ConanFile):
         tools.replace_in_file(cmakelists, '-fsanitize=undefined', '')
         tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
         tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
-        shutil.copy("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
         # FIXME : components
         shutil.copy("glib.pc", "glib-2.0.pc")
         shutil.copy("glib.pc", "gthread-2.0.pc")
@@ -163,6 +159,7 @@ class FluidSynthConan(ConanFile):
         with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
             cmake = self._configure_cmake()
             cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
@@ -170,18 +167,16 @@ class FluidSynthConan(ConanFile):
         else:
             self.cpp_info.libs = ["fluidsynth"]
         if self.settings.os == "Macos":
-            frameworks = []
             if self.options.coreaudio:
-                frameworks.extend(["CoreAudio", "AudioToolbox", "CoreServices"])
+                self.cpp_info.frameworks.extend(
+                    ["CoreAudio", "AudioToolbox", "CoreServices"])
             if self.options.coremidi:
-                frameworks.append("CoreMidi")
-            for framework in frameworks:
-                self.cpp_info.exelinkflags.append("-framework %s" % framework)
+                self.cpp_info.frameworks.append("CoreMidi")
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
         if self.settings.os == "Windows":
             if self.options.network:
-                self.cpp_info.libs.append("ws2_32")
+                self.cpp_info.system_libs.append("ws2_32")
             if self.options.dsound:
-                self.cpp_info.libs.append("dsound")
+                self.cpp_info.system_libs.append("dsound")
             if self.options.winmidi:
-                self.cpp_info.libs.append("winmm")
+                self.cpp_info.system_libs.append("winmm")
