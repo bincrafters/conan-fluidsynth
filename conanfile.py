@@ -50,7 +50,6 @@ class FluidSynthConan(ConanFile):
                 return True
 
     name = "fluidsynth"
-    version = "2.0.5"
     description = "Software synthesizer based on the SoundFont 2 specifications"
     topics = ("conan", "fluidsynth", "soundfont", "midi", "synthesizer")
     url = "https://github.com/bincrafters/conan-fluidsynth"
@@ -141,7 +140,6 @@ class FluidSynthConan(ConanFile):
     def _patch_files(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         # remove some quirks, let conan manage them
-        tools.replace_in_file(cmakelists, '-fsanitize=undefined', '')
         tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
         tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
         # FIXME : components
