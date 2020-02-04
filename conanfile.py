@@ -170,7 +170,6 @@ class FluidSynthConan(ConanFile):
                     ["CoreAudio", "AudioToolbox", "CoreServices"])
             if self.options.coremidi:
                 self.cpp_info.frameworks.append("CoreMidi")
-            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
         if self.settings.os == "Windows":
             if self.options.network:
                 self.cpp_info.system_libs.append("ws2_32")
