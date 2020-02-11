@@ -78,7 +78,7 @@ class FluidSynthConan(ConanFile):
                      CustomOption("dsound", default=True, platforms=["Windows"]),
                      CustomOption("waveout", default=True, platforms=["Windows"]),
                      CustomOption("winmidi", default=True, platforms=["Windows"]),
-                     CustomOption("sdl2", requirements=["sdl2/2.0.9@bincrafters/stable"]),
+                     CustomOption("sdl2", requirements=["sdl2/2.0.10@bincrafters/stable"]),
                      CustomOption("pkgconfig", default=True),
                      CustomOption("pulseaudio"),
                      CustomOption("readline", requirements=["readline/7.0@bincrafters/stable"]),
@@ -166,8 +166,7 @@ class FluidSynthConan(ConanFile):
             self.cpp_info.libs = ["fluidsynth"]
         if self.settings.os == "Macos":
             if self.options.coreaudio:
-                self.cpp_info.frameworks.extend(
-                    ["CoreAudio", "AudioToolbox", "CoreServices"])
+                self.cpp_info.frameworks.extend(["CoreAudio", "AudioToolbox", "CoreServices"])
             if self.options.coremidi:
                 self.cpp_info.frameworks.append("CoreMidi")
         if self.settings.os == "Windows":
