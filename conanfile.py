@@ -168,6 +168,7 @@ class FluidSynthConan(ConanFile):
         else:
             self.cpp_info.libs = ["fluidsynth"]
         if self.settings.os == "Macos":
+            self.cpp_info.frameworks.append("Foundation")
             if self.options.coreaudio:
                 self.cpp_info.frameworks.extend(["CoreAudio", "AudioToolbox", "CoreServices"])
             if self.options.coremidi:
