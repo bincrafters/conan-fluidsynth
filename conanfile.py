@@ -53,9 +53,9 @@ class FluidSynthConan(ConanFile):
     description = "Software synthesizer based on the SoundFont 2 specifications"
     topics = ("conan", "fluidsynth", "soundfont", "midi", "synthesizer")
     url = "https://github.com/bincrafters/conan-fluidsynth"
-    homepage = "http://www.fluidsynth.org/"
+    homepage = "http://www.fluidsynth.org"
     license = "LGPL-2.1-only"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     conan_options = [CustomOption("shared"),
@@ -94,7 +94,7 @@ class FluidSynthConan(ConanFile):
     default_options = {o.name: o.default for o in conan_options}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    requires = "glib/2.58.3@bincrafters/stable"
+    requires = "glib/2.63.6@bincrafters/stable"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -139,9 +139,11 @@ class FluidSynthConan(ConanFile):
 
     def _patch_files(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # remove some quirks, let conan manage them
-        tools.replace_in_file(cmakelists, 'string ( REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}" )', '')
+        # remove some quirks, let Conan manage them
         tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         # FIXME : components
         shutil.copy("glib.pc", "glib-2.0.pc")
         shutil.copy("glib.pc", "gthread-2.0.pc")
@@ -158,6 +160,7 @@ class FluidSynthConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "bin", "pkgconfig"))
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
