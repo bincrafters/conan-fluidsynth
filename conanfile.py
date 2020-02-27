@@ -58,9 +58,7 @@ class FluidSynthConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
-    conan_options = [CustomOption("shared"),
-                     CustomOption("fPIC", default=True, platforms_blacklist=["Windows"]),
-                     CustomOption("floats"),
+    conan_options = [CustomOption("floats"),
                      CustomOption("fpe-check"),
                      CustomOption("trap-on-check"),
                      CustomOption("portaudio", requirements=["portaudio/v190600.20161030@bincrafters/stable"]),
@@ -90,8 +88,12 @@ class FluidSynthConan(ConanFile):
                      CustomOption("coremidi", default=True, platforms=["Macos"]),
                      CustomOption("framework", platforms=["Macos"])]
 
-    options = {o.name: o.values for o in conan_options}
-    default_options = {o.name: o.default for o in conan_options}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+
+    options.update({o.name: o.values for o in conan_options})
+    default_options.update({o.name: o.default for o in conan_options})
+
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     requires = "glib/2.63.6@bincrafters/stable"
@@ -106,6 +108,9 @@ class FluidSynthConan(ConanFile):
                 self.build_requires("pkg-config_installer/0.29.2@bincrafters/stable")
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
         for o in self.conan_options:
             if not o.check_platform(self.settings.os):
                 self.options.remove(o.name)
