@@ -96,7 +96,7 @@ class FluidSynthConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    requires = "glib/2.63.6@bincrafters/stable"
+    requires = "glib/2.64.0@bincrafters/stable"
 
     def configure(self):
         del self.settings.compiler.libcxx
