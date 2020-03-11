@@ -129,8 +129,7 @@ class FluidSynthConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["enable-debug"] = self.settings.build_type == "Debug"
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared  # fluidsynth forces to True by default
+        cmake.definitions["enable-debug"] = self.settings.build_type
         cmake.definitions["enable-tests"] = False
         cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
         for o in self.conan_options:
