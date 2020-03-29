@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import glob
 import shutil
 
 
@@ -55,7 +56,7 @@ class FluidSynthConan(ConanFile):
     url = "https://github.com/bincrafters/conan-fluidsynth"
     homepage = "http://www.fluidsynth.org"
     license = "LGPL-2.1-only"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["patches/*"]
     generators = "cmake", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     conan_options = [CustomOption("floats"),
@@ -137,16 +138,22 @@ class FluidSynthConan(ConanFile):
                 cmake.definitions[o.cmake_name] = getattr(self.options, o.name)
             else:
                 cmake.definitions[o.cmake_name] = False
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return cmake
 
     def _patch_files(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # remove some quirks, let Conan manage them
-        tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
         if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
+
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        # remove some quirks, let Conan manage them
+        tools.replace_in_file(cmakelists, "project ( FluidSynth C )", """project ( FluidSynth C )
+include(../conanbuildinfo.cmake)
+conan_basic_setup()
+        """)
+        tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
+
         # FIXME : components
         shutil.copy("glib.pc", "glib-2.0.pc")
         shutil.copy("glib.pc", "gthread-2.0.pc")
@@ -164,8 +171,17 @@ class FluidSynthConan(ConanFile):
             cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "pkgconfig"))
+        files = []
+        files.extend(glob.glob(os.path.join(self.package_folder, "bin", "msvcp*.dll")))
+        files.extend(glob.glob(os.path.join(self.package_folder, "bin", "vcruntime*.dll")))
+        files.extend(glob.glob(os.path.join(self.package_folder, "bin", "concrt*.dll")))
+        for f in files:
+            os.remove(f)
 
     def package_info(self):
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = ["fluidsynth" if self.options.shared else "libfluidsynth"]
         else:
