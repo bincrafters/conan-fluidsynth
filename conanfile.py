@@ -77,7 +77,7 @@ class FluidSynthConan(ConanFile):
                      CustomOption("dsound", default=True, platforms=["Windows"]),
                      CustomOption("waveout", default=True, platforms=["Windows"]),
                      CustomOption("winmidi", default=True, platforms=["Windows"]),
-                     CustomOption("sdl2", requirements=["sdl2/2.0.10@bincrafters/stable"]),
+                     CustomOption("sdl2", requirements=["sdl2/2.0.12@bincrafters/stable"]),
                      CustomOption("pkgconfig", default=True),
                      CustomOption("pulseaudio"),
                      CustomOption("readline", requirements=["readline/7.0@bincrafters/stable"]),
