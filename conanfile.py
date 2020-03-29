@@ -152,7 +152,6 @@ class FluidSynthConan(ConanFile):
 include(../conanbuildinfo.cmake)
 conan_basic_setup()
         """)
-        tools.replace_in_file(cmakelists, 'set ( CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS} )', '')
 
         # FIXME : components
         shutil.copy("glib.pc", "glib-2.0.pc")
