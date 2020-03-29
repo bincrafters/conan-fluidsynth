@@ -137,8 +137,7 @@ class FluidSynthConan(ConanFile):
                 cmake.definitions[o.cmake_name] = getattr(self.options, o.name)
             else:
                 cmake.definitions[o.cmake_name] = False
-        cmake.configure(build_folder=self._build_subfolder,
-                        source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def _patch_files(self):
