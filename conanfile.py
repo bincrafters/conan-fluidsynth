@@ -11,15 +11,15 @@ class FluidSynthConan(ConanFile):
                      default=None,
                      cmake_name=None,
                      platforms=None,
-                     platforms_blacklist=None,
+                     platforms_denylist=None,
                      requirements=None):
             self._name = name
             self._values = values or [True, False]
             self._default = default or False
             self._cmake_name = cmake_name or name
             self._cmake_name = "enable-" + self._cmake_name
-            self._platforms_whitelist = platforms
-            self._platforms_blacklist = platforms_blacklist
+            self._platforms_allowlist = platforms
+            self._platforms_denylist = platforms_denylist
             self._requirements = requirements or []
 
         @property
@@ -43,10 +43,10 @@ class FluidSynthConan(ConanFile):
             return self._requirements
 
         def check_platform(self, the_os):
-            if self._platforms_whitelist:
-                return the_os in self._platforms_whitelist
-            elif self._platforms_blacklist:
-                return the_os not in self._platforms_blacklist
+            if self._platforms_allowlist:
+                return the_os in self._platforms_allowlist
+            elif self._platforms_denylist:
+                return the_os not in self._platforms_denylist
             else:
                 return True
 
@@ -80,7 +80,7 @@ class FluidSynthConan(ConanFile):
                      CustomOption("sdl2", requirements=["sdl2/2.0.12@bincrafters/stable"]),
                      CustomOption("pkgconfig", default=True),
                      CustomOption("pulseaudio"),
-                     CustomOption("readline", requirements=["readline/7.0@bincrafters/stable"]),
+                     CustomOption("readline", requirements=["readline/8.0"]),
                      CustomOption("threads"),
                      CustomOption("lash", platforms=["Linux", "FreeBSD"]),
                      CustomOption("alsa", platforms=["Linux", "FreeBSD"], requirements=["libalsa/1.1.9"]),
