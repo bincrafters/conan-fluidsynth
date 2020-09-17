@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
 import glob
-import shutil
 
 
 class FluidSynthConan(ConanFile):
@@ -152,10 +151,6 @@ class FluidSynthConan(ConanFile):
 include(../conanbuildinfo.cmake)
 conan_basic_setup()
         """)
-
-        # FIXME : components
-        shutil.copy("glib.pc", "glib-2.0.pc")
-        shutil.copy("glib.pc", "gthread-2.0.pc")
 
     def build(self):
         self._patch_files()
