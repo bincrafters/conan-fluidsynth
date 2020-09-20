@@ -96,7 +96,7 @@ class FluidSynthConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    requires = "glib/2.65.1"
+    requires = "glib/2.66.0"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -104,8 +104,7 @@ class FluidSynthConan(ConanFile):
 
     def build_requirements(self):
         if self.options.pkgconfig:
-            if not tools.which("pkg-config"):
-                self.build_requires("pkg-config_installer/0.29.2@bincrafters/stable")
+            self.build_requires("pkgconf/1.7.3")
 
     def config_options(self):
         if self.settings.os == "Windows":
