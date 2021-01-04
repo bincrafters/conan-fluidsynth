@@ -1,98 +1,84 @@
 from conans import ConanFile, CMake, tools
 import os
-import glob
 
 
 class FluidSynthConan(ConanFile):
-    class CustomOption(object):
-        def __init__(self, name,
-                     values=None,
-                     default=None,
-                     cmake_name=None,
-                     platforms=None,
-                     platforms_denylist=None,
-                     requirements=None):
-            self._name = name
-            self._values = values or [True, False]
-            self._default = default or False
-            self._cmake_name = cmake_name or name
-            self._cmake_name = "enable-" + self._cmake_name
-            self._platforms_allowlist = platforms
-            self._platforms_denylist = platforms_denylist
-            self._requirements = requirements or []
-
-        @property
-        def name(self):
-            return self._name
-
-        @property
-        def cmake_name(self):
-            return self._cmake_name
-
-        @property
-        def values(self):
-            return self._values
-
-        @property
-        def default(self):
-            return self._default
-
-        @property
-        def requirements(self):
-            return self._requirements
-
-        def check_platform(self, the_os):
-            if self._platforms_allowlist:
-                return the_os in self._platforms_allowlist
-            elif self._platforms_denylist:
-                return the_os not in self._platforms_denylist
-            else:
-                return True
-
     name = "fluidsynth"
     description = "Software synthesizer based on the SoundFont 2 specifications"
     topics = ("conan", "fluidsynth", "soundfont", "midi", "synthesizer")
     url = "https://github.com/bincrafters/conan-fluidsynth"
     homepage = "http://www.fluidsynth.org"
     license = "LGPL-2.1-only"
-    exports_sources = ["patches/*"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
-    conan_options = [CustomOption("floats"),
-                     CustomOption("fpe-check"),
-                     CustomOption("trap-on-check"),
-                     CustomOption("portaudio", requirements=["portaudio/v190600.20161030@bincrafters/stable"]),
-                     CustomOption("aufile"),
-                     CustomOption("dbus"),
-                     CustomOption("ipv6", default=True),
-                     CustomOption("jack"),
-                     CustomOption("ladspa"),
-                     CustomOption("libsndfile"),
-                     CustomOption("midishare"),
-                     CustomOption("opensles"),
-                     CustomOption("oboe"),
-                     CustomOption("network", default=True),
-                     CustomOption("oss"),
-                     CustomOption("dsound", default=True, platforms=["Windows"]),
-                     CustomOption("waveout", default=True, platforms=["Windows"]),
-                     CustomOption("winmidi", default=True, platforms=["Windows"]),
-                     CustomOption("sdl2", requirements=["sdl2/2.0.12@bincrafters/stable"]),
-                     CustomOption("pkgconfig", default=True),
-                     CustomOption("pulseaudio"),
-                     CustomOption("readline", requirements=["readline/8.0"]),
-                     CustomOption("threads"),
-                     CustomOption("lash", platforms=["Linux", "FreeBSD"]),
-                     CustomOption("alsa", platforms=["Linux", "FreeBSD"], requirements=["libalsa/1.1.9"]),
-                     CustomOption("systemd", platforms=["Linux"]),
-                     CustomOption("coreaudio", default=True, platforms=["Macos"]),
-                     CustomOption("coremidi", default=True, platforms=["Macos"]),
-                     CustomOption("framework", platforms=["Macos"])]
 
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    options.update({o.name: o.values for o in conan_options})
-    default_options.update({o.name: o.default for o in conan_options})
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "floats": [True, False],
+        "fpe-check": [True, False],
+        "trap-on-check": [True, False],
+        "portaudio": [True, False],
+        "aufile": [True, False],
+        "dbus": [True, False],
+        "ipv6": [True, False],
+        "jack": [True, False],
+        "ladspa": [True, False],
+        "libsndfile": [True, False],
+        "midishare": [True, False],
+        "opensles": [True, False],
+        "oboe": [True, False],
+        "network": [True, False],
+        "oss": [True, False],
+        "dsound": [True, False],
+        "waveout": [True, False],
+        "winmidi": [True, False],
+        "sdl2": [True, False],
+        "pkgconfig": [True, False],
+        "pulseaudio": [True, False],
+        "readline": [True, False],
+        "threads": [True, False],
+        "lash": [True, False],
+        "alsa": [True, False],
+        "systemd": [True, False],
+        "coreaudio": [True, False],
+        "coremidi": [True, False],
+        "framework": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "floats": False,
+        "fpe-check": False,
+        "trap-on-check": False,
+        "portaudio": False,
+        "aufile": False,
+        "dbus": False,
+        "ipv6": True,
+        "jack": False,
+        "ladspa": False,
+        "libsndfile": False,
+        "midishare": False,
+        "opensles": False,
+        "oboe": False,
+        "network": True,
+        "oss": False,
+        "dsound": True,
+        "waveout": True,
+        "winmidi": True,
+        "sdl2": False,
+        "pkgconfig": True,
+        "pulseaudio": False,
+        "readline": False,
+        "threads": False,
+        "lash": False,
+        "alsa": False,
+        "systemd": False,
+        "coreaudio": True,
+        "coremidi": True,
+        "framework": True,
+    }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -110,16 +96,30 @@ class FluidSynthConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        for o in self.conan_options:
-            if not o.check_platform(self.settings.os):
-                self.options.remove(o.name)
+        if self.settings.os != "Windows": 
+            del self.options.dsound
+            del self.options.waveout
+            del self.options.winmidi
+ 
+        if not self.settings.os in ["Linux", "FreeBSD"]:
+            del self.options.lash
+            del self.options.alsa
+
+        if self.settings.os != "Linux":
+            del self.options.systemd
+
+        if self.settings.os != "Macos":
+            del self.options.coreaudio
+            del self.options.coremidi
+            del self.options.framework
 
     def requirements(self):
-        for o in self.conan_options:
-            if o.check_platform(self.settings.os):
-                if getattr(self.options, o.name):
-                    for r in o.requirements:
-                        self.requires(r)
+        if self.options.get_safe("portaudio"):
+            self.requires("portaudio/v190600.20161030@bincrafters/stable")
+        if self.options.get_safe("sdl2"):
+            self.requires("sdl2/2.0.14@bincrafters/stable")
+        if self.options.get_safe("readline"):
+            self.requires("readline/8.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -131,28 +131,19 @@ class FluidSynthConan(ConanFile):
         cmake.definitions["enable-debug"] = self.settings.build_type
         cmake.definitions["enable-tests"] = False
         cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
-        for o in self.conan_options:
-            if o.check_platform(self.settings.os):
-                cmake.definitions[o.cmake_name] = getattr(self.options, o.name)
-            else:
-                cmake.definitions[o.cmake_name] = False
-        cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+
+        for o in ["floats", "fpe-check", "trap-on-check", "portaudio", "aufile", "dbus", "ipv6", "jack", "ladspa",
+        "libsndfile", "midishare", "opensles", "oboe", "network", "oss", "dsound", "waveout", "winmidi", "sdl2", "pkgconfig", "pulseaudio",
+        "readline", "threads", "lash", "alsa", "systemd", "coreaudio", "coremidi", "framework"]:
+            cmake.definitions[o] = self.options.get_safe(o)
+    
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def _patch_files(self):
-        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        # remove some quirks, let Conan manage them
-        tools.replace_in_file(cmakelists, "project ( FluidSynth C )", """project ( FluidSynth C )
-include(../conanbuildinfo.cmake)
-conan_basic_setup()
-        """)
-
     def build(self):
-        self._patch_files()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+    
         with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
             cmake = self._configure_cmake()
             cmake.build()
@@ -164,17 +155,15 @@ conan_basic_setup()
             cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "pkgconfig"))
-        files = []
-        files.extend(glob.glob(os.path.join(self.package_folder, "bin", "msvcp*.dll")))
-        files.extend(glob.glob(os.path.join(self.package_folder, "bin", "vcruntime*.dll")))
-        files.extend(glob.glob(os.path.join(self.package_folder, "bin", "concrt*.dll")))
-        for f in files:
-            os.remove(f)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "msvcp*.dll")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "vcruntime*.dll")
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "concrt*.dll")
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = ["fluidsynth" if self.options.shared else "libfluidsynth"]
         else:
