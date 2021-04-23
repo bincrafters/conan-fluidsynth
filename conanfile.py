@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 
 
+required_conan_version = ">=1.33.0"
+
 class FluidSynthConan(ConanFile):
     name = "fluidsynth"
     description = "Software synthesizer based on the SoundFont 2 specifications"
@@ -10,7 +12,7 @@ class FluidSynthConan(ConanFile):
     homepage = "http://www.fluidsynth.org"
     license = "LGPL-2.1-only"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "pkg_config"
+    generators = "CMakeToolchain", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -122,9 +124,7 @@ class FluidSynthConan(ConanFile):
             self.requires("readline/8.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -137,12 +137,17 @@ class FluidSynthConan(ConanFile):
         "readline", "threads", "lash", "alsa", "systemd", "coreaudio", "coremidi", "framework"]:
             cmake.definitions[o] = self.options.get_safe(o)
     
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
-    def build(self):
+    def _patch(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_admin )", "set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_admin )")
+
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+    def build(self):
+        self._patch()
     
         with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
             cmake = self._configure_cmake()
