@@ -95,7 +95,7 @@ class FluidSynthConan(ConanFile):
 
     def build_requirements(self):
         if self.options.pkgconfig:
-            self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.4")
 
     def config_options(self):
         if self.settings.os == "Windows":
