@@ -135,7 +135,7 @@ class FluidSynthConan(ConanFile):
         for o in ["floats", "fpe-check", "trap-on-check", "portaudio", "aufile", "dbus", "ipv6", "jack", "ladspa",
         "libsndfile", "midishare", "opensles", "oboe", "network", "oss", "dsound", "waveout", "winmidi", "sdl2", "pkgconfig", "pulseaudio",
         "readline", "threads", "lash", "alsa", "systemd", "coreaudio", "coremidi", "framework"]:
-            cmake.definitions[o] = self.options.get_safe(o)
+            cmake.definitions["enable-{}".format(o)] = self.options.get_safe(o)
     
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
