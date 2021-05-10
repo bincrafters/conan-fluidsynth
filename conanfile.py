@@ -144,8 +144,6 @@ class FluidSynthConan(ConanFile):
         return cmake
 
     def _patch(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_admin )", "set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_admin )")
-
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
