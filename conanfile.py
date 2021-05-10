@@ -1,8 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
-
 required_conan_version = ">=1.33.0"
+
 
 class FluidSynthConan(ConanFile):
     name = "fluidsynth"
