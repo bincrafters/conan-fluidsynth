@@ -143,13 +143,7 @@ class FluidSynthConan(ConanFile):
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
-    def _patch(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
     def build(self):
-        self._patch()
-    
         with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
             cmake = self._configure_cmake()
             cmake.build()
