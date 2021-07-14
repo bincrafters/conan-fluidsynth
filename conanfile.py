@@ -84,7 +84,7 @@ class FluidSynthConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    requires = "glib/2.68.1"
+    requires = "glib/2.69.0"
 
     def configure(self):
         if self.options.shared:
