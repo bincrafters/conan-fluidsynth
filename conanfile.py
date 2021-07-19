@@ -79,7 +79,7 @@ class FluidSynthConan(ConanFile):
         "systemd": False,
         "coreaudio": True,
         "coremidi": True,
-        "framework": True,
+        "framework": False,
     }
 
     _source_subfolder = "source_subfolder"
@@ -134,6 +134,7 @@ class FluidSynthConan(ConanFile):
         cmake.definitions["enable-debug"] = self.settings.build_type
         cmake.definitions["enable-tests"] = False
         cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
+        cmake.definitions["FRAMEWORK_INSTALL_DIR"] = os.path.join(self.package_folder, "Frameworks")
 
         for o in ["floats", "fpe-check", "trap-on-check", "portaudio", "aufile", "dbus", "ipv6", "jack", "ladspa",
         "libsndfile", "midishare", "opensles", "oboe", "network", "oss", "dsound", "waveout", "winmidi", "sdl2", "pkgconfig", "pulseaudio",
@@ -148,6 +149,11 @@ class FluidSynthConan(ConanFile):
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "find_package ( OpenMP QUIET )",
             "#find_package ( OpenMP QUIET )",
+        )
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+            "${GLIB_LIBRARIES}",
+            "${GLIB_LINK_LIBRARIES}",
         )
         with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
             cmake = self._configure_cmake()
@@ -179,6 +185,8 @@ class FluidSynthConan(ConanFile):
                 self.cpp_info.frameworks.extend(["CoreAudio", "AudioToolbox", "CoreServices"])
             if self.options.coremidi:
                 self.cpp_info.frameworks.append("CoreMidi")
+            if self.options.framework:
+                self.cpp_info.frameworks.append("FluidSynth")
         if self.settings.os == "Windows":
             if self.options.network:
                 self.cpp_info.system_libs.append("ws2_32")
