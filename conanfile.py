@@ -85,6 +85,7 @@ class FluidSynthConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     requires = "glib/2.69.0"
+    _cmake = None
 
     def configure(self):
         if self.options.shared:
@@ -130,20 +131,22 @@ class FluidSynthConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["enable-debug"] = self.settings.build_type
-        cmake.definitions["enable-tests"] = False
-        cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
-        cmake.definitions["FRAMEWORK_INSTALL_DIR"] = os.path.join(self.package_folder, "Frameworks")
-        cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_toolchain.cmake"
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["enable-debug"] = self.settings.build_type
+        self._cmake.definitions["enable-tests"] = False
+        self._cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
+        self._cmake.definitions["FRAMEWORK_INSTALL_DIR"] = os.path.join(self.package_folder, "Frameworks")
+        self._cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = os.path.join(self.install_folder, "conan_toolchain.cmake")
 
         for o in ["floats", "fpe-check", "trap-on-check", "portaudio", "aufile", "dbus", "ipv6", "jack", "ladspa",
         "libsndfile", "midishare", "opensles", "oboe", "network", "oss", "dsound", "waveout", "winmidi", "sdl2", "pkgconfig", "pulseaudio",
         "readline", "threads", "lash", "alsa", "systemd", "coreaudio", "coremidi", "framework"]:
-            cmake.definitions["enable-{}".format(o)] = self.options.get_safe(o)
+            self._cmake.definitions["enable-{}".format(o)] = self.options.get_safe(o)
 
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         tools.replace_in_file(
@@ -195,5 +198,6 @@ class FluidSynthConan(ConanFile):
                 self.cpp_info.system_libs.append("dsound")
             if self.options.winmidi:
                 self.cpp_info.system_libs.append("winmm")
+            self.cpp_info.system_libs.append("ksuser")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
