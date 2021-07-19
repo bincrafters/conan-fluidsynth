@@ -135,6 +135,7 @@ class FluidSynthConan(ConanFile):
         cmake.definitions["enable-tests"] = False
         cmake.definitions["LIB_INSTALL_DIR"] = "lib"  # https://github.com/FluidSynth/fluidsynth/issues/476
         cmake.definitions["FRAMEWORK_INSTALL_DIR"] = os.path.join(self.package_folder, "Frameworks")
+        cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_toolchain.cmake"
 
         for o in ["floats", "fpe-check", "trap-on-check", "portaudio", "aufile", "dbus", "ipv6", "jack", "ladspa",
         "libsndfile", "midishare", "opensles", "oboe", "network", "oss", "dsound", "waveout", "winmidi", "sdl2", "pkgconfig", "pulseaudio",
