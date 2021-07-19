@@ -1,4 +1,7 @@
 sources:
+  "2.2.2":
+    url: "https://github.com/FluidSynth/fluidsynth/archive/v2.2.2.tar.gz"
+    sha256: "695aedbfd53160fef7a9a1f66cd6d5cc8a5da0fd472eee458d82b848b6065f9a"
   "2.1.9":
     url: "https://github.com/FluidSynth/fluidsynth/archive/v2.1.9.tar.gz"
     sha256: "365642cc64bafe0491149ad643ef7327877f99412d5abb93f1fa54e252028484"

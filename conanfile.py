@@ -101,11 +101,11 @@ class FluidSynthConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os != "Windows": 
+        if self.settings.os != "Windows":
             del self.options.dsound
             del self.options.waveout
             del self.options.winmidi
- 
+
         if not self.settings.os in ["Linux", "FreeBSD"]:
             del self.options.lash
             del self.options.alsa
@@ -139,11 +139,16 @@ class FluidSynthConan(ConanFile):
         "libsndfile", "midishare", "opensles", "oboe", "network", "oss", "dsound", "waveout", "winmidi", "sdl2", "pkgconfig", "pulseaudio",
         "readline", "threads", "lash", "alsa", "systemd", "coreaudio", "coremidi", "framework"]:
             cmake.definitions["enable-{}".format(o)] = self.options.get_safe(o)
-    
+
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "find_package ( OpenMP QUIET )",
+            "#find_package ( OpenMP QUIET )",
+        )
         with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
             cmake = self._configure_cmake()
             cmake.build()
@@ -181,3 +186,5 @@ class FluidSynthConan(ConanFile):
                 self.cpp_info.system_libs.append("dsound")
             if self.options.winmidi:
                 self.cpp_info.system_libs.append("winmm")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
